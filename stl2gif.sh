@@ -33,17 +33,17 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
         -D '$vpr = [60, 0, 360 * $t];' \
         -o "${MYTMPDIR}/foo.png"  \
         -D "import(\"${MYTMPDIR}/foo-centered.stl\");" \
-        --imgsize=300,300 \
+        --imgsize=600,600 \
         --animate 60 \
         --colorscheme "Tomorrow Night" \
         --viewall --autocenter
 
     #TODO: replace with docker container
     yes | ffmpeg \
-        -framerate 12 \
+        -framerate 15 \
         -pattern_type glob \
         -i "$MYTMPDIR/*.png" \
-        -r 24 \
+        -r 60 \
         -vf scale=512:-1 \
         "${file}.gif" \
         ;
