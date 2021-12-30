@@ -1,6 +1,10 @@
 #!/bin/bash
 
 set -u
+if [ -z "$(docker --version)" ]; then
+	echo "Docker is not installed. Please install docker before running this script."
+	exit 1
+fi
 docker pull spuder/stl2origin:latest
 docker pull linuxserver/ffmpeg:version-4.4-cli
 

@@ -18,6 +18,7 @@ find ~+ ! -path "*/cropped/*" -type f -name "*.jpeg" -print0 | while read -d '' 
     mkdir -p "${dir}/cropped" || true
     cp "${dir}/${base}.jpeg" "${dir}/cropped/${base}.jpeg"
     echo "Cropping $dir/cropped/$base.jpeg"
+    #TODO: replace with docker container
     mogrify -resize 1280x960 "$dir/cropped/$base.jpeg"
 done
 
