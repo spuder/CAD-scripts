@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -u
+set -ue
 if [ -z "$(docker --version)" ]; then
 	echo "Docker is not installed. Please install docker before running this script."
 	exit 1
@@ -49,7 +49,7 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
     docker run --rm \
         -v "${MYTMPDIR}:/input" \
         -v "${dirname}:/output" \
-        linuxserver/ffmpeg:version-4.4-cli -framerate 15 -pattern_type glob -i 'input/*.png' -r 25 -vf scale=512:-1 "/output/${filename}.gif";
+        linuxserver/ffmpeg:version-4.4-cli -y -framerate 15 -pattern_type glob -i 'input/*.png' -r 25 -vf scale=512:-1 "/output/${filename}.gif";
     ls "${MYTMPDIR}"
     rm -rf -- "${MYTMPDIR}"
 done
