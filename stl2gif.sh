@@ -37,16 +37,18 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
         --imgsize=600,600 \
         --animate 60 \
         --colorscheme "Tomorrow Night" \
-        --viewall --autocenter
+        --viewall --autocenter \
+        --preview \
+        --quiet
 
     #TODO: replace with docker container
     yes | ffmpeg \
         -framerate 15 \
         -pattern_type glob \
-        -i "$MYTMPDIR/*.png" \
-        -r 60 \
+        -i "${MYTMPDIR}/*.png" \
+        -r 25 \
         -vf scale=512:-1 \
         "${file}.gif" \
         ;
-    rm -rf -- "$MYTMPDIR"
+    rm -rf -- "${MYTMPDIR}"
 done
