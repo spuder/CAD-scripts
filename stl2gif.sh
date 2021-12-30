@@ -2,15 +2,16 @@
 
 set -u
 docker pull spuder/stl2origin:latest
+docker pull linuxserver/ffmpeg:version-4.4-cli
 
 find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do 
 
+    filename=$(basename "$file" ".stl")
+    dirname=$(dirname "$file")
     echo "Reading $file"
     MYTMPDIR="$(mktemp -d)"
     trap 'rm -rf -- "$MYTMPDIR"' EXIT
-
     echo "Creating temp directory ${MYTMPDIR}"
-
     # Detect how offcenter STL file is. Save variable output to foo.sh ($XTRANS, $YTRANS, $ZTRANS)
     echo "Centering the STL file ${file}"
     docker run \
@@ -41,14 +42,10 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
         --preview \
         --quiet
 
-    #TODO: replace with docker container
-    yes | ffmpeg \
-        -framerate 15 \
-        -pattern_type glob \
-        -i "${MYTMPDIR}/*.png" \
-        -r 25 \
-        -vf scale=512:-1 \
-        "${file}.gif" \
-        ;
+    docker run --rm \
+        -v "${MYTMPDIR}:/input" \
+        -v "${dirname}:/output" \
+        linuxserver/ffmpeg:version-4.4-cli -framerate 15 -pattern_type glob -i 'input/*.png' -r 25 -vf scale=512:-1 "/output/${filename}.gif";
+    ls "${MYTMPDIR}"
     rm -rf -- "${MYTMPDIR}"
 done
