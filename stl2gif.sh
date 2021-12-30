@@ -5,7 +5,7 @@ docker pull spuder/stl2origin:latest
 
 find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do 
 
-	echo "Reading $file"
+    echo "Reading $file"
     MYTMPDIR="$(mktemp -d)"
     trap 'rm -rf -- "$MYTMPDIR"' EXIT
 
