@@ -21,11 +21,12 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
         "/input/$(basename "$file")"
     cp "${file}" "$MYTMPDIR/foo.stl"
     source $MYTMPDIR/foo.sh
+    cat $MYTMPDIR/foo.sh
     # Create new (temporary) STL that has been centered
     docker run \
         -v "$MYTMPDIR:/input" \
         -v "$MYTMPDIR:/output" \
-        openscad/openscad:2021.01 openscad /dev/null -D "translate([$XTRANS,$YTRANS,$ZTRANS])import(\"/input/foo.stl\");" -o "/output/foo-centered.stl"
+        openscad/openscad:2021.01 openscad /dev/null -D "translate([$XTRANS-$XMID,$YTRANS-$YMID,$ZTRANS-$ZMID])import(\"/input/foo.stl\");" -o "/output/foo-centered.stl"
 
     #TODO: replace with openscad/openscad docker container
     # https://github.com/openscad/openscad/issues/4028
