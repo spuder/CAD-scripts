@@ -50,6 +50,7 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
     echo "Duplicating ${filename} and centering object at origin"
     echo "======================================================"
     docker run \
+        --rm \
         -v stl2gif-input:/input \
         -v stl2gif-output:/output \
         openscad/openscad:2021.01 openscad /dev/null -D "translate([$XTRANS-$XMID,$YTRANS-$YMID,$ZTRANS-$ZMID])import(\"/input/${filename}.stl\");" -o "/output/foo-centered.stl"
@@ -129,3 +130,9 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
     echo "======================================"
     rm -rf -- "${MYTMPDIR}"
 done
+
+
+docker rm $INPUT_ID
+docker rm $OUTPUT_ID
+docker volume rm stl2gif-input
+docker volume rm stl2gif-output
