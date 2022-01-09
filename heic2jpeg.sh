@@ -3,12 +3,20 @@
 
 set -eu -o pipefail
 
+docker pull spuder/heic2jpeg:latest
 #TODO: support .PNG and .JPG
+docker volume create --name heic2jpeg-input
+INPUT_ID=$(docker run -d -v heic2jpeg-input:/input busybox true)
 
 # Convert HEIC to JPEG
 find ~+ -type f -name "*.HEIC" -print0 | while read -d '' -r file; do 
+    filename=$(basename "$file" ".HEIC")
+    dirname=$(dirname "$file")
     echo "Converting $file"
-    magick mogrify -monitor -format jpeg "$file"
+    docker cp "${file}" "${INPUT_ID}:/input/${filename}.HEIC"
+    docker run --rm -v heic2jpeg-input:/input dpokidov/imagemagick "/input/${filename}.HEIC" -format jpeg "/input/${filename}.jpeg"
+    docker cp ${INPUT_ID}:/input/${filename}.jpeg ${dirname}/${filename}.jpeg
+
 done
 
 # Copy all .JPEG to 'cropped' folder then resize to 1280x960 for uplading to thingiverse
@@ -16,10 +24,12 @@ find ~+ ! -path "*/cropped/*" -type f -name "*.jpeg" -print0 | while read -d '' 
     dir=$(dirname "$file")
     base=$(basename "$file" .jpeg)
     mkdir -p "${dir}/cropped" || true
-    cp "${dir}/${base}.jpeg" "${dir}/cropped/${base}.jpeg"
+    # cp "${dir}/${base}.jpeg" "${dir}/cropped/${base}.jpeg"
     echo "Cropping $dir/cropped/$base.jpeg"
-    #TODO: replace with docker container
-    mogrify -resize 1280x960 "$dir/cropped/$base.jpeg"
+    # mogrify -resize 1280x960 "$dir/cropped/$base.jpeg"
+    docker cp "${dir}/${base}.jpeg"  "${INPUT_ID}:/input/${base}.jpeg"
+    docker run --rm -v heic2jpeg-input:/input dpokidov/imagemagick "/input/${base}.jpeg" -resize 1280x960 "/input/${base}-cropped.jpeg"
+    docker cp ${INPUT_ID}:/input/${base}-cropped.jpeg ${dir}/cropped/${base}.jpeg
 done
 
 # Cleanup all HEIC files that were converted to JPEG
@@ -34,3 +44,5 @@ find ~+ -type f -name "*.jpeg" -print0 | while read -d '' -r file; do
     fi
 done
 
+docker rm $INPUT_ID
+docker volume rm heic2jpeg-input
