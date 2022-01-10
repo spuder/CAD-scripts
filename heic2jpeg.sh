@@ -20,23 +20,26 @@ find ~+ -type f -name "*.HEIC" -print0 | while read -d '' -r file; do
 done
 
 # Copy all .JPEG to 'cropped' folder then resize to 1280x960 for uplading to thingiverse
-find ~+ ! -path "*/cropped/*" -type f -name "*.jpeg" -print0 | while read -d '' -r file; do 
+find ~+ ! -path "*/cropped/*" -type f \( -iname "*.jpeg" -o -iname "*.jpg" \) -print0 | while read -d '' -r file; do 
     dir=$(dirname "$file")
-    base=$(basename "$file" .jpeg)
-    mkdir -p "${dir}/cropped" || true
+    filename=$(basename "$file")
+    mkdir -p "${dir}/cropped"
     # cp "${dir}/${base}.jpeg" "${dir}/cropped/${base}.jpeg"
-    echo "Cropping $dir/cropped/$base.jpeg"
+    echo "Cropping $dir/cropped/$filename"
     # mogrify -resize 1280x960 "$dir/cropped/$base.jpeg"
-    docker cp "${dir}/${base}.jpeg"  "${INPUT_ID}:/input/${base}.jpeg"
-    docker run --rm -v heic2jpeg-input:/input dpokidov/imagemagick "/input/${base}.jpeg" -resize 1280x960 "/input/${base}-cropped.jpeg"
-    docker cp ${INPUT_ID}:/input/${base}-cropped.jpeg ${dir}/cropped/${base}.jpeg
+    docker cp "${dir}/${filename}"  "${INPUT_ID}:/input/${filename}"
+    docker run --rm -v heic2jpeg-input:/input dpokidov/imagemagick "/input/$filename" -resize 1280x960 "/input/${filename}-cropped.jpeg"
+    docker cp "${INPUT_ID}:/input/${filename}-cropped.jpeg" "${dir}/cropped/${filename}"
 done
 
 # Cleanup all HEIC files that were converted to JPEG
-find ~+ -type f -name "*.jpeg" -print0 | while read -d '' -r file; do 
+find ~+ -type f \( -iname "*.jpeg" -o -iname "*.jpg" \) -print0 | while read -d '' -r file; do 
     dir=$(dirname "$file")
-    base=$(basename "$file" .jpeg)
-
+    if [[ "$file" == *".jpeg" ]]; then
+        base=$(basename "$file" .jpeg)
+    else
+        base=$(basename "$file" .jpg)
+    fi
     echo "Checking if $dir/$base.heic exists"
     if [[ -f "$dir/$base.heic" ]]; then
         echo "Removing previously converted file: $dir/$base.heic"
