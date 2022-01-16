@@ -25,12 +25,12 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
 	filename=$(basename "${file}" ".stl")
 	dirname=$(dirname "${file}")
 
-	docker cp ${file} $INPUT_ID:/input/
+	docker cp "${file}" "${INPUT_ID}:/input/"
 	docker run --init --rm \
 		-v "stl2png-input:/input" \
 		-v "stl2png-output:/output" \
 		openscad/openscad:2021.01 xvfb-run -a openscad /dev/null -o "/output/${filename}.png" -D "import(\"/input/${filename}.stl\");" --imgsize=600,600 --colorscheme "Tomorrow Night" --autocenter --viewall
-	docker cp $OUTPUT_ID:/output/${filename}.png "${dirname}"
+	docker cp "${OUTPUT_ID}:/output/${filename}.png" "${dirname}"
 done
 
 docker rm $INPUT_ID
