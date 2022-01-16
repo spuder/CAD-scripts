@@ -3,7 +3,7 @@
 
 set -eu -o pipefail
 
-docker pull spuder/heic2jpeg:latest
+docker pull dpokidov/imagemagick
 docker volume create --name heic2jpeg-input
 INPUT_ID=$(docker run -d -v heic2jpeg-input:/input busybox true)
 
