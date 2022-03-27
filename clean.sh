@@ -8,3 +8,6 @@ find templates -type f -name *.erb -print0 | while read -d '' -r file; do
     echo "Removing:  $file"
     rm -f "./$file"
 done
+
+docker volume rm stl2gif-input -f
+docker volume rm stl2gif-output -f
