@@ -44,6 +44,7 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
 
     # cp "${file}" "$MYTMPDIR/foo.stl"
     source $MYTMPDIR/foo.sh
+    cat ${MYTMPDIR}/foo.sh
     # cat $MYTMPDIR/foo.sh
 
     echo ""
@@ -79,14 +80,19 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
         exit 1
     fi
 
+    # vpd defines how far away the camera is. If the camera is too close, increase the value to zoom out
+    # use x+y+z as a quick and dirty way to dynamically set the zoom
+    # it is likely that this value will need to be tweaked. 
     $openscad_path /dev/null \
         -D '$vpr = [60, 0, 360 * $t];' \
+        -D "\$vpd = ${XSIZE}+${YSIZE}+${ZSIZE};" \
         -o "${MYTMPDIR}/foo.png"  \
         -D "import(\"${MYTMPDIR}/foo-centered.stl\");" \
         --imgsize=600,600 \
         --animate 60 \
         --colorscheme "Tomorrow Night" \
-        --viewall --autocenter \
+        --viewall \
+        --autocenter \
         --preview \
         --quiet
 
@@ -130,7 +136,6 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
     echo "======================================"
     rm -rf -- "${MYTMPDIR}"
 done
-
 
 docker rm $INPUT_ID
 docker rm $OUTPUT_ID
