@@ -98,6 +98,7 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
         --animate 60 \
         --viewall --autocenter \
         --preview \
+        --colorscheme "Tomorrow Night" \
         --quiet
 
     # This solution works but is very slow and has some glitches
