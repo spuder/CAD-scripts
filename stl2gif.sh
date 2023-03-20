@@ -79,20 +79,24 @@ find ~+ -type f -name "*.stl" -print0 | while read -d '' -r file; do
         echo "OpenSCAD 2021.01 or later is required to run this script. Please update openscad before running this script."
         exit 1
     fi
+    # Check hsvtorgb.scad is in openscad library path
+    #TODO: it would be better to use a relative path `use <lib/hsvtorgb.scad>``
+    # howevever that isn't working for some reason
+    if [ ! -f "$HOME/Documents/OpenSCAD/libraries/hsvtorgb.scad" ]; then
+        echo "hsvtorgb.scad is not installed. Installing"
+        # copy hsvtorgb.scad to openscad library path
+        mkdir -p "$HOME/Documents/OpenSCAD/libraries"
+        cp lib/hsvtorgb.scad "$HOME/Documents/OpenSCAD/libraries/hsvtorgb.scad"
+    fi
 
-    # vpd defines how far away the camera is. If the camera is too close, increase the value to zoom out
-    # use x+y+z as a quick and dirty way to dynamically set the zoom
-    # it is likely that this value will need to be tweaked. 
     $openscad_path /dev/null \
+        -D 'use <hsvtorgb.scad>;' \
         -D '$vpr = [60, 0, 360 * $t];' \
-        -D "\$vpd = ${XSIZE}+${YSIZE}+${ZSIZE};" \
         -o "${MYTMPDIR}/foo.png"  \
-        -D "import(\"${MYTMPDIR}/foo-centered.stl\");" \
+        -D "color(hsvToRGB(\$t,1,1)) import(\"${MYTMPDIR}/foo-centered.stl\");" \
         --imgsize=600,600 \
         --animate 60 \
-        --colorscheme "Tomorrow Night" \
-        --viewall \
-        --autocenter \
+        --viewall --autocenter \
         --preview \
         --quiet
 
