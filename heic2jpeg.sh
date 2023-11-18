@@ -16,7 +16,7 @@ find ~+ -type f -name "*.HEIC" -print0 | while read -d '' -r file; do
     echo "Converting $file"
     docker cp "${file}" "${INPUT_ID}:/input/${filename}.HEIC"
     docker run --rm -v heic2jpeg-input:/input dpokidov/imagemagick "/input/${filename}.HEIC" -format jpeg "/input/${filename}.jpeg"
-    docker cp ${INPUT_ID}:/input/${filename}.jpeg ${dirname}/${filename}.jpeg
+    docker cp "${INPUT_ID}:/input/${filename}.jpeg" "${dirname}/${filename}.jpeg"
 done
 
 # Copy all .JPEG to 'cropped' folder then resize to 1280x960 for uplading to thingiverse
